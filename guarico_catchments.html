@@ -1,0 +1,256 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>Victor's Portfolio - Cartography / Geospatial Analysis</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a href="index.html" class="logo">Victor's Portfolio</a>
+					</header>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul class="links">
+							<li><a href="index.html">Main</a></li>
+							</ul>
+						<ul class="icons">
+							<li><a href="https://www.linkedin.com/in/vaescobarb/" class="icon brands fa-linkedin"><span class="label">LinkedIn</span></a></li>
+							<li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post -->
+							<section class="post">
+								<header class="major">
+									<h1> Stream Delineation from a DEM</h1>
+								</header>
+
+								<!-- Text stuff -->
+									<h2></h2>
+									<p><li><b>Tools:</b> QGIS, GDAL, PCRaster</li>
+									<b><li>Data:</b> USGS Earth Explorer: SRTM 1 Arc-Second Global</li>
+										<li>Venezuela´s states:  http://tapiquen-sig.jimdofree.com. Carlos Efraín Porto Tapiquén. Geografía, SIG y Cartografía Digital. Valencia, España, 2020.
+									</li></p>
+									<hr/>
+									<header>
+										<h2>About the data</h2>
+									</header>
+									<p>The base data corresponds to a Digital Elevation Model (DEM) from the Guarico State, in Venezuela. The state is crossed by several rivers
+										and streams. 
+									</p>
+									<header>
+										<h2>The Processing</h2>
+									</header>
+									<p>The delineation was done using an automation script written in Python. After filling voids and sinks, the script delineates the streams by
+										applying the Strahler method.
+									</script></p>
+										<hr />
+
+								<!-- Image -->
+								<span class="image fit"><img src="images/guarico_catchments.png" alt="" /></span>
+								
+									</header>
+									<p></p>
+									<hr />
+
+								<!-- Lists -->
+									<h2>SKILLS APPLIED</h2>
+									<div class="row">
+										<div class="col-6 col-12-small">
+
+											<ul>
+												<li>GDAL</li>
+												<li>Raster Analysis and Manipulation</li>
+												<li>PCRaster</li>
+											</ul>
+										</div>
+									
+									</div>
+									<h2>Python Script</h2>
+									<pre><code>
+
+import glob ,os 
+from osgeo import gdal, gdalconst
+from pcraster import *
+										
+										
+def createmosaic(tile_extension,outputname):
+#This function creates a mosaic with all the tiff. files available in the folder 
+	inputFiles = glob.glob(tile_extension)
+	mosaic = gdal.BuildVRT(outputname, inputFiles) #Builds the mosaic as a virtual image
+	mosaic.FlushCache() #writes the layer to disk
+											
+										
+										
+def reproject_and_clip(inputraster,outputraster,projection,shapefile,resolution):
+	options = gdal.WarpOptions(cutlineDSName=shapefile, 
+	cropToCutline=True,      # whether to use cutline extent for output bounds
+	format = 'GTIFF',        # output format ("ESRI Shapefile", etc...)
+	dstSRS = projection,     #output Spatial Reference System
+	xRes = resolution,       #output resolution in target SRS
+	yRes = resolution)
+	
+	outimage = gdal.Warp(srcDSOrSrcDSTab = inputraster, #an array of Dataset objects or filenames
+							destNameOrDestDS = outputraster, #Output dataset name or object
+							options = options)
+	
+
+def fill_voids(inputraster):
+	raster = gdal.Open(inputraster,gdal.GA_Update)
+	band = raster.GetRasterBand(1)
+	filled = gdal.FillNodata(targetBand = band, maskBand = None, 
+						maxSearchDist = 15, smoothingIterations = 0)
+	band.FlushCache()
+
+
+
+def convert_to_pcraster(src_filename,dst_filename,ot,VS):
+	#open existing data set
+	src_ds = gdal.Open(src_filename)
+	
+	#GDAL Translate
+	dst_ds = gdal.Translate(dst_filename, src_ds,
+	format='PCRaster',
+	outputType=ot,
+	metadataOptions = VS)
+	
+	#Properly close the datasets to flush the changes to disk
+	dst_ds = None
+	srt_ds = None
+	
+def calculate_flow_direction(inputmap): #
+	DEM = readmap(inputmap)
+	FlowDirectionMap = lddcreate(DEM,1e31,1e31,1e31,1e31)
+	
+	return FlowDirectionMap
+
+def calculate_strahler_orders(inputmap):
+	FlowDir = inputmap
+	strahler_orders = streamorder(FlowDir)
+	
+	return strahler_orders
+
+def stream_delineation(FlowDirectionMap,Threshold):
+	StrahlerOrders = streamorder(FlowDirectionMap)
+	Stream = ifthen(StrahlerOrders >= Threshold, boolean(1))
+	return Stream
+
+tile_format = '*.tif'
+mosaic_name= '01_mosaic.vrt'
+boundaries_polygon = 'boundaries.shp'
+EPSG = 'EPSG:32620' #Suitable Projection
+spatialresolution = 30
+DEMSubset = '01_dem_subset.tif'
+PCRasterDEMFilledPCRasterDEMOutput = '01_dem.map'
+PCRasterDEMFilled = '01_sinks_filled.map'
+clone = PCRasterDEMFilled
+DEM = '01_dem_subset.tif'
+DEM_sinks_filled = '01_sinks_filled.tif'
+StrahlerThreshold = 9 #based on the observations of the Strahler orders
+
+print("Creating Mosaic...") #All the available tiles are grouped in a Mosaic
+createmosaic(tile_format,mosaic_name)
+print("Mosaic created.")
+
+print("Reprojecting and clipping...") # The area of study is clipped and reprojected 
+reproject_and_clip(mosaic_name,DEMSubset,EPSG,boundaries_polygon,spatialresolution)
+print("Reprojected and Clipped.")
+
+print("Filling Voids...") # Areas of no data are filled b interpolation
+fill_voids(DEMSubset)
+print("Voids filled.")
+	
+print("Filling sinks...") #Sinks are filled to produce a hydrological correct model
+DEMFilled = lddcreatedem(DEMSubset,1e31,1e31,1e31,1e31)
+report(DEMFilled,'01_sinks_filled.map')
+print("Sinks filled.")
+
+print("Calculating flow direction...") 
+setclone(clone)
+FlowDirection = calculate_flow_direction(PCRasterDEMFilled)
+report(FlowDirection,'01_flowdir.map')
+aguila(FlowDirection)
+print("Flow direction calculated.")
+
+print("Calculating Strahler Orders...")
+FlowDirection = readmap('01_flowdir.map')
+Strahler = calculate_strahler_orders (FlowDirection)
+report(Strahler, '01_strahler_orders.map')
+aguila(Strahler)
+print("Streams orders calculated.")
+
+MaximumStrahlerOrder = mapmaximum(Strahler)
+MaximumStrahlerOrderTuple = cellvalue(MaximumStrahlerOrder,0,0)
+print(MaximumStrahlerOrderTuple)
+MaximumStrahlerOrderValue = MaximumStrahlerOrderTuple[0]
+print(MaximumStrahlerOrderValue)
+
+for order in range (1,MaximumStrahlerOrderValue + 1): #A raster file is created for each of the Strahler orders
+	Stream = ifthen(Strahler >=order, boolean(1))
+	report(Stream,'f_stream'+ str(order) + '.map')
+
+print('Delineating channels...')
+River = stream_delineation(FlowDirection,StrahlerThreshold)
+print('Channels delineated.')
+aguila (River)
+
+
+outlets = pit(FlowDirection)
+aguila(outlets)
+report(outlets,'outlets.map')
+Catchments = catchment(FlowDirection, outlets)
+report(FlowDirection,'flowdir.map')
+report(River,'channels.map')
+										
+</code></pre>
+										
+							
+					</div>
+
+				<!-- Footer -->
+				<footer id="footer">
+					<section class="split contact">
+											
+						<section>
+							<h3>Networks</h3>
+							<ul class="icons alt">
+								<li><a href="https://www.linkedin.com/in/vaescobarb/" class="icon brands alt fa-linkedin"><span class="label">Twitter</span></a></li>
+
+							</ul>
+						</section>
+					</section>
+				</footer>
+
+				
+
+				<!-- Copyright -->
+					<div id="copyright">
+						<ul><li>Design: <a href="https://html5up.net">HTML5 UP</a></li></ul>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>

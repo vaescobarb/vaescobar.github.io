@@ -1,0 +1,124 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>Victor's Portfolio - Cartography / Geospatial Analysis</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a href="index.html" class="logo">Victor's Portfolio</a>
+					</header>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul class="links">
+							<li><a href="index.html">Main</a></li>
+							</ul>
+						<ul class="icons">
+							<li><a href="https://www.linkedin.com/in/vaescobarb/" class="icon brands fa-linkedin"><span class="label">LinkedIn</span></a></li>
+							<li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post -->
+							<section class="post">
+								<header class="major">
+									<h1> Vector Analysis - Areas of interest for moving in Hamburg</h1>
+								</header>
+
+								<!-- Text stuff -->
+									<h2></h2>
+									<p><li><b>Tools:</b> ESRI ArcMap, ModelBuilder</li>
+									<b><li>Data:</b> ESRI Deutschland Open Data</li></p>
+									<hr/>
+									<header>
+										<h2>About the data</h2>
+									</header>
+									<p>The datasets correspond, in the majority, to Hamburg. They were downloaded from the ESRI Deutschland Open
+										Data Portal. There is a data set corresponding to the municipalities of all Germany, used to set Hamburg
+										in context. A dataset containing the city divisions in Hamburg was used to delineate the area of study.
+										Additionally, there is a line data set used for the bike routes and two point data sets corresponding to
+										the public transport stations and park locations.</p>
+									<header>
+										<h2>The Processing</h2>
+									</header>
+									<p>The processing was done using ModelBuilder. Moreover, Buffers were created to establish distances according
+										to how much I was willing to move to get to the desired destination. 500 meters for parks, 1000 m for
+										public transportation stations, and 1000 m for bike routes, since I can reach the latter by cycling. These
+										Buffers were then intersected to discriminate interesting areas.</p>
+										<hr />
+
+								<!-- Image -->
+								<span class="image fit"><img src="images/hamburg_victor_escobar.jpg" alt="" /></span>
+								
+									</header>
+									<p>The results show a group of zones in the central area of the city. However, there are a couple of areas of
+										interest on the south side of the city. The main conclusion being that the best zone to look for a place 
+										to move in would be in the middle of the city. There was an additional analysis. There is a dataset
+										available with all the addresses in the city, which contains 276,411 addresses. After having the zones of
+										interest polygon, I applied an intersection with this addresses dataset, I obtained 9390 interesting addresses.
+										To me, this is a good example of how to filter data by using spatial analysis.</p>
+									<hr />
+
+								<!-- Lists -->
+									<h2>SKILLS APPLIED</h2>
+									<div class="row">
+										<div class="col-6 col-12-small">
+
+											<ul>
+												<li>Model Builder</li>
+												<li>Clip, Dissolve</li>
+												<li>Buffer, join, select by attribute</li>
+												<li>Intersection</li>
+											</ul>
+										</div>
+									
+									</div>
+										
+							
+					</div>
+
+				<!-- Footer -->
+				<footer id="footer">
+					<section class="split contact">
+											
+						<section>
+							<h3>Networks</h3>
+							<ul class="icons alt">
+								<li><a href="https://www.linkedin.com/in/vaescobarb/" class="icon brands alt fa-linkedin"><span class="label">Twitter</span></a></li>
+
+							</ul>
+						</section>
+					</section>
+				</footer>
+
+				<!-- Copyright -->
+					<div id="copyright">
+						<ul><li>Design: <a href="https://html5up.net">HTML5 UP</a></li></ul>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
